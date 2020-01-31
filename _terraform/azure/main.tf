@@ -20,7 +20,7 @@ provider "azurerm" {
 #--------------------------------------------------------------------------
 # Create resource group
 resource "azurerm_resource_group" "rg" {
-  name     = "${var.prefix}-k8s-resources"
+  name     = "${var.prefix}-rg"
   location = var.location
 }
 
@@ -28,7 +28,7 @@ resource "azurerm_resource_group" "rg" {
 # Create Azure Container Registry
 # https://www.terraform.io/docs/providers/azurerm/r/container_registry.html
 resource "azurerm_container_registry" "acr" {
-  name                = "${replace(var.prefix, "-", "")}k8sacr"
+  name                = "${replace(var.prefix, "-", "")}acr"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   sku                 = "Standard"
@@ -40,11 +40,11 @@ resource "azurerm_container_registry" "acr" {
 #--------------------------------------------------------------------------
 # Create Azure Kubernetes Cluster
 # https://www.terraform.io/docs/providers/azurerm/r/kubernetes_cluster.html
-resource "azurerm_kubernetes_cluster" "k8s" {
-  name                = "${var.prefix}-k8s"
+resource "azurerm_kubernetes_cluster" "aks" {
+  name                = "${var.prefix}-aks"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  dns_prefix          = "${var.prefix}-k8s"
+  dns_prefix          = "${var.prefix}-aks"
   kubernetes_version  = var.kubernetes_version
 
   default_node_pool {
@@ -70,15 +70,15 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 # Allow k8s to pull from ACR
 # Assign AcrPull role to service principal
 # https://github.com/terraform-providers/terraform-provider-azurerm/issues/5275#issuecomment-579182890
-#resource "azurerm_role_assignment" "acrpull_role" {
-#  scope                = azurerm_container_registry.acr.id
-#  role_definition_name = "AcrPull"
-#principal_id         = azuread_service_principal.aks-aad.object_id
-#depends_on = [
-#  azurerm_container_registry.acr,
-#  azuread_application.aks
-#]
-#}
+resource "azurerm_role_assignment" "acrpull_role" {
+  scope                = azurerm_container_registry.acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = var.kubernetes_client_id
+  depends_on = [
+    azurerm_container_registry.acr,
+    azurerm_kubernetes_cluster.aks
+  ]
+}
 
 #--------------------------------------------------------------------------
 # (optional) Enable [Azure Dev spaces](https://docs.microsoft.com/bs-latn-ba/azure/dev-spaces/)
@@ -94,8 +94,8 @@ resource "azurerm_devspace_controller" "devspaces" {
   sku_name = "S1"
 
   #host_suffix                              = "suffix"
-  target_container_host_resource_id        = azurerm_kubernetes_cluster.k8s.id
-  target_container_host_credentials_base64 = base64encode(azurerm_kubernetes_cluster.k8s.kube_config_raw)
+  target_container_host_resource_id        = azurerm_kubernetes_cluster.aks.id
+  target_container_host_credentials_base64 = base64encode(azurerm_kubernetes_cluster.aks.kube_config_raw)
 
   tags = {
     Environment = "Testing"

@@ -1,6 +1,7 @@
 variable "prefix" {
   description = "A prefix used for all resources"
-  default     = "hello-aks"
+  # seabhel: https://www.fantasynamegenerators.com/marvel-celestial-names.php
+  default = "hello-aks-seabhel"
 }
 
 variable "location" {

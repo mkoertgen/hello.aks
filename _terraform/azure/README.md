@@ -14,8 +14,8 @@ az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/${SUBSCRI
 
 ```console
 terraform init
-terraform play --out example.plan
-terraform apply example.plan
+terraform play [--out example.plan]
+terraform apply [example.plan] [-auto-approve]
 terraform destroy
 ```
 
