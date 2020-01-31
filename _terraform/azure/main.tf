@@ -17,24 +17,43 @@ provider "azurerm" {
   # tenant_id       = "..."  
 }
 
+#--------------------------------------------------------------------------
+# Create resource group
 resource "azurerm_resource_group" "rg" {
   name     = "${var.prefix}-k8s-resources"
   location = var.location
 }
 
+#--------------------------------------------------------------------------
+# Create Azure Container Registry
+# https://www.terraform.io/docs/providers/azurerm/r/container_registry.html
+resource "azurerm_container_registry" "acr" {
+  name                = "${replace(var.prefix, "-", "")}k8sacr"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  sku                 = "Standard"
+  admin_enabled       = false
+  #georeplication_locations = ["East US", "West Europe"]
+}
+
+
+#--------------------------------------------------------------------------
+# Create Azure Kubernetes Cluster
 # https://www.terraform.io/docs/providers/azurerm/r/kubernetes_cluster.html
 resource "azurerm_kubernetes_cluster" "k8s" {
   name                = "${var.prefix}-k8s"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   dns_prefix          = "${var.prefix}-k8s"
+  kubernetes_version  = var.kubernetes_version
 
-  agent_pool_profile {
-    name            = "default"
-    count           = 1
-    vm_size         = "Standard_D1_v2"
-    os_type         = "Linux"
-    os_disk_size_gb = 30
+  default_node_pool {
+    name = "default"
+    #node_count = 1
+    vm_size             = "Standard_D2_v2"
+    enable_auto_scaling = true
+    min_count           = 1
+    max_count           = 5
   }
 
   service_principal {
@@ -47,12 +66,38 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   }
 }
 
-# https://www.terraform.io/docs/providers/azurerm/r/container_registry.html
-resource "azurerm_container_registry" "acr" {
-  name                = "${replace(var.prefix, "-", "")}k8sacr"
-  resource_group_name = azurerm_resource_group.rg.name
+#--------------------------------------------------------------------------
+# Allow k8s to pull from ACR
+# Assign AcrPull role to service principal
+# https://github.com/terraform-providers/terraform-provider-azurerm/issues/5275#issuecomment-579182890
+#resource "azurerm_role_assignment" "acrpull_role" {
+#  scope                = azurerm_container_registry.acr.id
+#  role_definition_name = "AcrPull"
+#principal_id         = azuread_service_principal.aks-aad.object_id
+#depends_on = [
+#  azurerm_container_registry.acr,
+#  azuread_application.aks
+#]
+#}
+
+#--------------------------------------------------------------------------
+# (optional) Enable [Azure Dev spaces](https://docs.microsoft.com/bs-latn-ba/azure/dev-spaces/)
+# - https://www.terraform.io/docs/providers/azurerm/r/devspace_controller.html
+resource "azurerm_devspace_controller" "devspaces" {
+  # Conditional trick, cf.: https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
+  count = var.enable_devspaces ? 1 : 0
+
+  name                = "acctestdsc1"
   location            = azurerm_resource_group.rg.location
-  sku                 = "Standard"
-  admin_enabled       = false
-  #georeplication_locations = ["East US", "West Europe"]
+  resource_group_name = azurerm_resource_group.rg.name
+
+  sku_name = "S1"
+
+  #host_suffix                              = "suffix"
+  target_container_host_resource_id        = azurerm_kubernetes_cluster.k8s.id
+  target_container_host_credentials_base64 = base64encode(azurerm_kubernetes_cluster.k8s.kube_config_raw)
+
+  tags = {
+    Environment = "Testing"
+  }
 }
