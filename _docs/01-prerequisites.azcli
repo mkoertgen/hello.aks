@@ -1,0 +1,50 @@
+# For Azure locations, typically `eastus` or `northeurope` will be lowest price. List locations using
+# Check pricing with the [Azure Pricing Calculator](https://azure.microsoft.com/en-us/pricing/calculator/?service=kubernetes-service).
+az account list-locations
+
+# --- Assuming `eastus`, now create resources using
+# 1. Create resource group
+az group create -n hello-aks -l eastus
+
+# 2. Create container registry
+az acr create -n helloaks -g hello-aks -l eastus --sku Basic
+az acr login -n helloaks
+# 3. Create AKS cluster
+
+# az aks get-versions -l eastus ---> latest version: 1.17.0
+az aks create -g hello-aks -l eastus -n helloaks -k 1.17.0 --generate-ssh-keys
+
+# --- DevOps
+# Grant cluster 'helloaks' to pull from container registry 'helloaks'
+az aks update -g hello-aks -n helloaks --attach-acr helloaks
+
+# (optional) Enable [Azure Dev spaces](https://docs.microsoft.com/bs-latn-ba/azure/dev-spaces/) do
+az aks use-dev-spaces -g hello-aks -n helloaks
+
+# --- Cluster scaling
+# Get pools and scaling
+az aks show -g hello-aks -n helloaks --query agentPoolProfiles
+# Default will be { name: nodepool1, count: 3, minCount: null, maxCount: null, enableAutoScaling: null }
+
+# Scale down to 1 node
+az aks scale -g hello-aks -n helloaks --nodepool-name nodepool1 -c 1
+# Scale up to 3 again
+az aks scale -g hello-aks -n helloaks --nodepool-name nodepool1 -c 3
+
+# Auto Scaling, cf.:
+# - https://docs.microsoft.com/en-us/azure/aks/cluster-autoscaler
+# Enable auto-scaler (1-5 nodes)
+az aks update -g hello-aks -n helloaks -e --min-count 1 --max-count 5
+# Disable auto-scaler
+az aks update -g hello-aks -n helloaks -d
+
+# --- HTTP Application Routing
+# Not recommended, for dev/test only, cf.:
+# - https://docs.microsoft.com/en-us/azure/aks/http-application-routing
+# This tutorial (using draft.sh) makes use of this for quick evaluation purposes
+
+
+
+# --- Cleanup
+#az group delete hello-aks
+

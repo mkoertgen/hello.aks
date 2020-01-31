@@ -1,4 +1,11 @@
-# Phippy and Friends
+# hello.aks
+
+Forked from _Phippy and Friends_, cf.:
+
+- [Azure/phippyandfriends](https://github.com/Azure/phippyandfriends)
+- [The Illustrated Children's Guide to Kubernetes](https://azure.microsoft.com/en-us/resources/videos/the-illustrated-children-s-guide-to-kubernetes/)
+
+---
 
 The [Children's Guide to Kubernetes](https://azure.microsoft.com/en-us/resources/videos/the-illustrated-children-s-guide-to-kubernetes/) is a simple, gentle answer a father gives his daughter, when she inquisitively asked about Kubernetes. It was written by [Matt](https://twitter.com/technosophos) [Butcher](http://technosophos.com/) on the [DEIS blog](https://deis.com/blog/2016/kubernetes-illustrated-guide/).
 
@@ -34,6 +41,8 @@ Here's a short list of all the things you'll need to do. Don't worry - you'll be
     1. [Helm](http://helm.sh) and [Draft](https://draft.sh/) are also required, as they enable deploying and debugging code in Kubernetes.
     1. [Visual Studio Code](http://code.visualstudio.com) and the [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) for it would also be great to have.
 
+For more details see [_docs/01-prerequisites.md](_docs/01-prerequisites.md).
+
 ## Get Started!
 
 To get started, follow these simple steps.
@@ -43,8 +52,8 @@ To get started, follow these simple steps.
 The Phippy and Friends repository is public. Just clone it to your local machine and open the folder up in Visual Studio Code to get started.
 
 ```bash
-git clone https://github.com/Azure/phippyandfriends.git
-cd phippy-demo
+git clone https://github.com/Azure/phippyandfriends.git hello.aks
+cd hello.aks
 code .
 ```
 
@@ -53,7 +62,7 @@ code .
 A few of the services will provide HTML UIs. To enable external access, Ingress needs to be set up on each of these services using the external DNS of the cluster. Don't worry, though, this is easy. You can use VS Code's integrated terminal or the Cloud Shell tools in VS Code to run this `az` command line call, which will get your AKS cluster's external DNS.
 
 ```bash
-az aks show -n <your cluster name> -g <your resource group name> --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName
+az aks show -n helloaks -g hello-aks --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName
 ```
 
 ![Get DNS via AZ](media/get-url-via-az.png)
