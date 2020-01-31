@@ -49,7 +49,7 @@ resource "azurerm_kubernetes_cluster" "k8s" {
 
 # https://www.terraform.io/docs/providers/azurerm/r/container_registry.html
 resource "azurerm_container_registry" "acr" {
-  name                = "${replace(var.prefix, "-", "")}acr"
+  name                = "${replace(var.prefix, "-", "")}k8sacr"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   sku                 = "Standard"
