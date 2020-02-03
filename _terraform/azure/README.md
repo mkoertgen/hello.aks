@@ -14,10 +14,18 @@ az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/${SUBSCRI
 
 ```console
 terraform init
-terraform play [--out example.plan]
-terraform apply [example.plan] [-auto-approve]
+terraform plan [--out hello-aks.tfplan]
+terraform apply [hello-aks.tfplan] [-auto-approve]
+terraform show -no-color > hello-aks.tfstate
 terraform destroy
 ```
+
+Typical timings
+
+- Resource Group: create: ~2s, destroy ~1m
+- ACR: create ~9s, destroy ~3s
+- AKS: create ~10m, destroy ~6m
+- AKS DevSpaces: create ~2m, destroy ~2m
 
 ## References
 

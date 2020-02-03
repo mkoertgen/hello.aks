@@ -45,7 +45,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   dns_prefix          = "${var.prefix}-aks"
-  kubernetes_version  = var.kubernetes_version
+  kubernetes_version  = var.k8s_version
 
   default_node_pool {
     name = "default"
@@ -57,12 +57,18 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   service_principal {
-    client_id     = var.kubernetes_client_id
-    client_secret = var.kubernetes_client_secret
+    client_id     = var.k8s_client_id
+    client_secret = var.k8s_client_secret
   }
 
   tags = {
-    Environment = "Production"
+    Environment = var.environment
+  }
+
+  addon_profile {
+    kube_dashboard {
+      enabled = true
+    }
   }
 }
 
@@ -73,7 +79,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 resource "azurerm_role_assignment" "acrpull_role" {
   scope                = azurerm_container_registry.acr.id
   role_definition_name = "AcrPull"
-  principal_id         = var.kubernetes_client_id
+  principal_id         = var.k8s_principal_id
   depends_on = [
     azurerm_container_registry.acr,
     azurerm_kubernetes_cluster.aks
@@ -85,7 +91,7 @@ resource "azurerm_role_assignment" "acrpull_role" {
 # - https://www.terraform.io/docs/providers/azurerm/r/devspace_controller.html
 resource "azurerm_devspace_controller" "devspaces" {
   # Conditional trick, cf.: https://blog.gruntwork.io/terraform-tips-tricks-loops-if-statements-and-gotchas-f739bbae55f9
-  count = var.enable_devspaces ? 1 : 0
+  count = var.k8s_enable_devspaces ? 1 : 0
 
   name                = "acctestdsc1"
   location            = azurerm_resource_group.rg.location
@@ -98,6 +104,6 @@ resource "azurerm_devspace_controller" "devspaces" {
   target_container_host_credentials_base64 = base64encode(azurerm_kubernetes_cluster.aks.kube_config_raw)
 
   tags = {
-    Environment = "Testing"
+    environment = var.environment
   }
 }
