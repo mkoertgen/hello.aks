@@ -16,8 +16,16 @@ services:
     <<: *base
     build:
       context: captainkube
+    depends_on: [ 'parrot']
 
   parrot:
     <<: *base
     build:
       context: parrot
+    ports: ['8080:80']
+
+  phippy:
+    <<: *base
+    build:
+      context: phippy
+    ports: ['8081:80', '3333:3333']

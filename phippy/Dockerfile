@@ -1,8 +1,9 @@
-FROM composer:1 AS build-env
-COPY . /app
-RUN cd /app && composer install
+FROM composer:1.9.3 AS build-env
+WORKDIR /app
+COPY . /app/
+RUN composer install
 
-FROM php:7.3.12-apache-stretch
+FROM php:7.4.2-apache-buster
 ENV PORT 3333
 EXPOSE 3333
 COPY --from=build-env /app /var/www/html
