@@ -11,3 +11,4 @@ service:
 ingress:
   enabled: false
   #basedomain: CHANGE_TO_YOUR_DNS.REGION.aksapp.io # replace with your own from the portal # replace with your own from the portal
+  basedomain: 625dda48de0145bfa3c7.eastus.aksapp.io
