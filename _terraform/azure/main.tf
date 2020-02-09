@@ -66,6 +66,11 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   addon_profile {
+    # TODO: testing only, not for production --> ingress
+    http_application_routing {
+      enabled = true
+    }
+    # TODO: no access to dashboard,  pod missing `kubectl get pods -n kube-system`
     kube_dashboard {
       enabled = true
     }
