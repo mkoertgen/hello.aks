@@ -52,7 +52,7 @@ To get started, follow these simple steps.
 The Phippy and Friends repository is public. Just clone it to your local machine and open the folder up in Visual Studio Code to get started.
 
 ```bash
-git clone https://github.com/Azure/phippyandfriends.git hello.aks
+git clone https://marcelkoertgen@dev.azure.com/marcelkoertgen/hello.aks/_git/hello.aks
 cd hello.aks
 code .
 ```
@@ -62,7 +62,7 @@ code .
 A few of the services will provide HTML UIs. To enable external access, Ingress needs to be set up on each of these services using the external DNS of the cluster. Don't worry, though, this is easy. You can use VS Code's integrated terminal or the Cloud Shell tools in VS Code to run this `az` command line call, which will get your AKS cluster's external DNS.
 
 ```bash
-az aks show -n helloaks -g hello-aks --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName
+az aks show -n hello-aks-seabhel-aks -g hello-aks-seabhel-rg --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName
 ```
 
 ![Get DNS via AZ](media/get-url-via-az.png)
@@ -81,13 +81,6 @@ Change the value of the `basedomain` property to match the DNS for your AKS clus
 
 ### Connect to your Registry
 
-If you want to select which registry to push to, use the command below:
-
-```bash
-draft config set registry <your Docker hub or Azure Container Registry>
-```
-
-If you're using ACR, you can also log into your registry using the Azure CLI.
 
 ```bash
 az acr login -n <your ACR instance name> -g <your ACR instance resource group>
