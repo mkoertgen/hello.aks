@@ -7,5 +7,6 @@ variables:
   registryServerName: '$(registryName).azurecr.io'
   projectName: ${{ parameters.projectName }}
   imageName: ${{ parameters.projectName }}
-  imageTag: latest #$(build.buildId)
-  helmChartVersion: latest #$(build.buildId)
+  # TODO: latest?
+  imageTag: $(build.buildId)
+  helmChartVersion: $(build.buildId)
