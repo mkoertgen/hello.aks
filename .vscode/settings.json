@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "**/*-pipeline.yml": "azure-pipelines",
+        "**/*-template.yml": "azure-pipelines"
+    },
+    "editor.formatOnSave": true
+}
