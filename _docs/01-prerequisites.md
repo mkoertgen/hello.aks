@@ -74,7 +74,7 @@ $az aks show -g hello-aks -n helloaks --query agentPoolProfiles
 Get `kubectl` config and ensure you are talking to the newly created k8s cluster
 
 ```bash
-$az aks get-credentials -n helloaks -g hello-aks
+$az aks get-credentials -n hello-aks-seabhel-aks -g hello-aks-seabhel-rg
 Merged "helloaks" as current context in ~/.kubeconfig
 
 $kubectl config use-context helloaks
