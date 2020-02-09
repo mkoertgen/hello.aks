@@ -81,7 +81,6 @@ Change the value of the `basedomain` property to match the DNS for your AKS clus
 
 ### Connect to your Registry
 
-
 ```bash
 az acr login -n <your ACR instance name> -g <your ACR instance resource group>
 ```
