@@ -5,3 +5,5 @@ variables:
   helmVersion: 3.0.2
   registryServerName: '$(registryName).azurecr.io'
   projectName: ${{ parameters.projectName }}
+  k8sNamespace: ${{ parameters.k8sNamespace }}
+  # define 5 more variables: aks, rg, aksSpId, aksSpSecret and aksSpTenantId in the Azure pipeline UI definition
