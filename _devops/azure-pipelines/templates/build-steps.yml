@@ -45,7 +45,6 @@ steps:
         -u $(registryLogin) \
         -p $(registryPassword) \
         $chartPackage
-    echo $(jq -n --arg version "$(helmChartVersion)" '{helmChartVersion: $version}') > $(build.artifactStagingDirectory)/variables.json
   name: helmPush
   displayName: 'az acr helm push'
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
