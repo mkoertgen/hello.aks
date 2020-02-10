@@ -1,0 +1,47 @@
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops
+parameters:
+  component: '_unset_'  # defaults for any parameters that aren't specified
+  k8sNamespace: 'phippyandfriends'
+  pool:
+    vmImage: 'ubuntu-latest'
+
+stages:
+# ---- build ---
+- stage: build
+  displayName: build
+  variables:
+  - group: acr
+  - template: vars.yml
+    parameters:
+      projectName: ${{ parameters.component }}
+  jobs:
+  - job: build_${{ parameters.component }}
+    displayName: "Build '${{ parameters.component }}'"
+    pool: ${{ parameters.pool }}
+    steps:
+    - template: build-steps.yml
+
+# ---- development ---
+- stage: development
+  displayName: development
+  condition: and(succeeded('build'), eq(variables['Build.SourceBranchName'], 'master'))
+  dependsOn:
+    - build
+  variables:
+  - group: acr
+  - group: aks
+  - template: vars.yml
+    parameters:
+      projectName: ${{ parameters.component }}
+      k8sNamespace: ${{ parameters.k8sNamespace }}
+  jobs:
+  - deployment: development
+    displayName: "Deploy '${{ parameters.component }}'"
+    pool: ${{ parameters.pool }}
+    environment: development-$(projectName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: deploy-steps.yml
+

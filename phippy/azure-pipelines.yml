@@ -1,0 +1,15 @@
+trigger:
+  batch: true
+  branches:
+    include: 
+    - '*'
+  paths:
+    include: 
+    - phippy
+    
+pr: none
+
+stages:
+- template: ../_devops/azure-pipelines/templates/stages.yml
+  parameters:
+    component: phippy

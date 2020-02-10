@@ -1,0 +1,29 @@
+# TODO: pipeline variables to define in Azure UI
+# group `acr`
+# - rg               (resource group name for ACR, AKS, ...)
+# - registryName     (resource name of the ACR)
+# - registryLogin    (ACR username)
+# - registryPassword (ACR password)
+# group `aks`
+# - aks              (AKS resource name)
+# - aksSpId          (AKS service principal id)
+# - aksSpSecret      (AKS client secret)
+# - aksSpTenantId    (AKS tenant id)
+
+parameters:
+  projectName: '' # project/component to build/deploy
+  k8sNamespace: 'phippyandfriends' # k8s namespace to deploy to
+
+variables:
+  # https://github.com/helm/helm/releases
+  helmVersion: 3.0.3
+  #
+  registryServerName: '$(registryName).azurecr.io'
+  #
+  projectName: ${{ parameters.projectName }}
+  imageName: ${{ parameters.projectName }}
+  # TODO: latest?
+  imageTag: $(build.buildId)
+  helmChartVersion: $(build.buildId)
+  #
+  k8sNamespace: ${{ parameters.k8sNamespace }}

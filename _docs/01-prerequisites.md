@@ -36,7 +36,7 @@ and check your resources in Azure portal [/resourceGroups/hello-aks/overview](ht
 To enable [Azure Dev spaces](https://docs.microsoft.com/bs-latn-ba/azure/dev-spaces/) do
 
 ```bash
-az aks use-dev-spaces -g hello-aks -n helloaks
+az aks use-dev-spaces -g hello-aks-seabhel-rg -n hello-aks-seabhel-aks --space dev --yes
 ```
 
 ## Cluster scaling
@@ -93,7 +93,7 @@ namespace/phippyandfriends created
 
 ## Install Draft
 
-**Note:** As of now, `draft` does not _helm without tiller_ [Azure/draft/issues/944](https://github.com/Azure/draft/issues/944). So either install draft & tiller (helm 2) or use pure helm instead
+**Note:** As of now, `draft` does not support _helm without tiller_ [Azure/draft/issues/944](https://github.com/Azure/draft/issues/944). So either install draft & tiller (helm 2) or use pure helm instead
 
 This tutorial uses [Draft](https://draft.sh/) to accomodate developer workflow so be sure to have it installed up-front, e.g. for Windows you would use Chocolatey to install [packages/draft](https://chocolatey.org/packages/draft)
 
