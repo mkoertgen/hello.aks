@@ -6,11 +6,10 @@ trigger:
   paths:
     include: 
     - nodebrady
-    - common/ci-steps-template.yml
-
+    
 pr: none
 
-jobs:
-- template: ../common/ci-job-template.yml
+stages:
+- template: ../_devops/azure-pipelines/templates/stages.yml
   parameters:
     component: nodebrady
