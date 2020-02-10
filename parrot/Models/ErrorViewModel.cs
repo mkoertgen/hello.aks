@@ -1,5 +1,3 @@
-using System;
-
 namespace parrot.Models
 {
     public class ErrorViewModel

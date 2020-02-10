@@ -1,16 +1,15 @@
-using System.Threading.Tasks;
-using System.Collections;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using parrot.Models;
 
-namespace parrot
+namespace parrot.Hubs
 {
     public class DaemonHub : Hub
     {
-        static List<Pod> Pods { get; set; }
-        static List<string> DeletedPods { get; set; }
+        private static List<Pod> Pods { get; }
+        private static List<string> DeletedPods { get; }
 
         static DaemonHub()
         {
@@ -18,7 +17,7 @@ namespace parrot
             DeletedPods = new List<string>();
         }
 
-        const string POD_DELETED_STATUS = "Deleted";
+        private const string PodDeletedStatus = "Deleted";
 
         public override Task OnConnectedAsync()
         {
@@ -36,25 +35,31 @@ namespace parrot
 
         public void RemovePod(Pod pod)
         {
-            Pods.Remove(Pods.First(x => x.Name == pod.Name));
+            Pods.Remove(GetPod(pod));
             DeletedPods.Add(pod.Name);
         }
 
         public void UpdatePod(Pod pod)
         {
-            Pods.First(x => x.Name == pod.Name).Name = pod.Name;
-            Pods.First(x => x.Name == pod.Name).Container = pod.Container;
-            Pods.First(x => x.Name == pod.Name).NameSpace = pod.NameSpace;
-            Pods.First(x => x.Name == pod.Name).Status = pod.Status;
+            var podToUpdate = GetPod(pod);
+            podToUpdate.Name = pod.Name;
+            podToUpdate.Container = pod.Container;
+            podToUpdate.NameSpace = pod.NameSpace;
+            podToUpdate.Status = pod.Status;
         }
 
-        public void clearClusterView()
+        private static Pod GetPod(Pod pod)
+        {
+            return Pods.First(x => x.Name == pod.Name);
+        }
+
+        public void ClearClusterView()
         {
             Pods.Clear();
             Clients.All.SendAsync("clusterViewUpdated", Pods);
         }
 
-        public void updateClusterView(Pod pod)
+        public void UpdateClusterView(Pod pod)
         {
             // If the container image is "image:tag", strip the ":tag", otherwise leave it alone
             // not all images are tagged, so..
@@ -62,14 +67,14 @@ namespace parrot
                 pod.ContainerImage = pod.ContainerImage.Substring(0, pod.ContainerImage.IndexOf(':'));
 
             if (Pods.Any(x => x.Name == pod.Name))
-                if (pod.Action == POD_DELETED_STATUS)
+                if (pod.Action == PodDeletedStatus)
                     RemovePod(pod);
                 else
                     UpdatePod(pod);
             else
                 AddPod(pod);
 
-                Clients.All.SendAsync("clusterViewUpdated", Pods);
+            Clients.All.SendAsync("clusterViewUpdated", Pods);
         }
     }
 }

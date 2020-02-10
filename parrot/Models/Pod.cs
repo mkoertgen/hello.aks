@@ -1,5 +1,3 @@
-using System;
-
 namespace parrot.Models
 {
     public class Pod
@@ -10,10 +8,7 @@ namespace parrot.Models
         public string ContainerImage { get; set; }
         public string Status { get; set; }
         public string Action { get; set; }
-        public string CardImageUrl
-        {
-            get { return string.Format("/media/{0}.png", Container); }
-        }
+        public string CardImageUrl => $"/media/{Container}.png";
 
         public override string ToString() {
             return $"Name: {Name}\nContainer: {Container}\nNameSpace: {NameSpace}\nContainerImage: {ContainerImage}\nStatus: {Status}\nAction: {Action}\nCardImageUrl: {CardImageUrl}";
