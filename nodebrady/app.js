@@ -4,9 +4,9 @@ const compress = require('koa-compress');
 const logger = require('koa-logger');
 const serve = require('koa-static');
 const route = require('koa-route');
-const koa = require('koa');
+const Koa = require('koa');
 const path = require('path');
-const app = module.exports = koa();
+const app = module.exports = new Koa();
 
 // Logger
 app.use(logger());

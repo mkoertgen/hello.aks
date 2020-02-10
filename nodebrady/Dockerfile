@@ -1,5 +1,5 @@
 # Build
-FROM node:carbon AS base
+FROM node:13.8.0-alpine3.11 AS base
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ WORKDIR /app
 COPY . /app
 
 # Release with Alpine
-FROM node:10-alpine AS release  
+FROM base AS release  
 
 # Create app directory
 WORKDIR /app

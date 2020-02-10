@@ -29,3 +29,9 @@ services:
     build:
       context: phippy
     ports: ['8081:80', '3333:3333']
+
+  nodebrady:
+    <<: *base
+    build:
+      context: nodebrady
+    ports: ['3000:3000']
