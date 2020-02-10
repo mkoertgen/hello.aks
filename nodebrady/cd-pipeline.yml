@@ -12,6 +12,6 @@ resources:
           - master
 
 stages:
-- template: ../common/templates/stages.yml  # Template reference
+- template: ../common/templates/cd-stages-template.yml
   parameters:
     component: nodebrady
