@@ -7,7 +7,6 @@ steps:
         .
   displayName: 'docker build'
   failOnStderr: true
-
 # push on master only
 - bash: |
     echo $(registryPassword) | docker login \
@@ -27,7 +26,6 @@ steps:
   displayName: 'install helm'
   inputs:
     helmVersionToInstall: $(helmVersion)
-
 - bash: |
     cd $(projectName)
     helm package \
@@ -49,8 +47,3 @@ steps:
   displayName: 'az acr helm push'
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
   failOnStderr: true
-  
-# ---- variables.json ---
-- publish: $(build.artifactStagingDirectory)
-  artifact: build-artifact
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
