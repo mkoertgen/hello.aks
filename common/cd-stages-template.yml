@@ -1,0 +1,31 @@
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/process/templates?view=azure-devops
+parameters:
+  component: '_unset_'  # defaults for any parameters that aren't specified
+  k8sNamespace: 'phippyandfriends'
+  pool:
+    vmImage: 'ubuntu-latest'
+  dependsOn: ''
+
+variables:
+- template: cd-vars-template.yml
+  parameters:
+      projectName: ${{ parameters.component }}
+  # define 3 more variables: registryName, registryLogin and registryPassword in the Azure pipeline UI definition
+
+stages:
+- stage: development
+  displayName: development
+  jobs:
+  - deployment: development
+    variables:
+      projectName: ${{ parameters.component }}
+      k8sNamespace: ${{ parameters.k8sNamespace }}
+      # define 5 more variables: aks, rg, aksSpId, aksSpSecret and aksSpTenantId in the Azure pipeline UI definition
+    displayName: "Deploy '${{ parameters.component }}'"
+    pool: ${{ parameters.pool }}
+    environment: development-$(projectName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: cd-steps-template.yml
