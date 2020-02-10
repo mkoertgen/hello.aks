@@ -1,12 +1,12 @@
 package main
 
 import (
-	"time"
 	"bytes"
 	"encoding/json"
-	"net/http"
 	"log"
+	"net/http"
 	"reflect"
+	"time"
 
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
