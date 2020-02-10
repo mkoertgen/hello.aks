@@ -13,6 +13,7 @@ stages:
   - template: cd-vars-template.yml
     parameters:
       projectName: ${{ parameters.component }}
+      k8sNamespace: ${{ parameters.k8sNamespace }}
       # define 3 more variables: registryName, registryLogin and registryPassword in the Azure pipeline UI definition
   jobs:
   - deployment: development
