@@ -1,48 +1,43 @@
 steps:
 # ---- docker ---
-- displayName: 'docker build'
-  bash: |
+- bash: |
     cd $(projectName)
     docker build \
         -t $(registryServerName)/$(imageName):$(imageTag) \
         .
+  displayName: 'docker build'
   failOnStderr: true
 
 # push on master only
-- displayName: 'docker login'
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
-  bash: |
+- bash: |
     echo $(registryPassword) | docker login \
         $(registryServerName) \
         -u $(registryLogin) \
         --password-stdin
-- displayName: 'docker push'
+  displayName: 'docker login'
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+- bash: |
+    docker push $(registryServerName)/$(imageName):$(imageTag)
+  displayName: 'docker push'
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
   failOnStderr: true
-  bash: |
-    docker push $(registryServerName)/$(imageName):$(imageTag)
 
 # ---- helm ---
-- displayName: 'install helm'
-  task: HelmInstaller@1
+- task: HelmInstaller@1
+  displayName: 'install helm'
   inputs:
     helmVersionToInstall: $(helmVersion)
 
-- displayName: 'helm package'
-  failOnStderr: true
-  bash: |
+- bash: |
     cd $(projectName)
     helm package \
         --version $(helmChartVersion) \
         --app-version $(imageTag) \
         charts/$(projectName)
-
-# push on master only
-- name: helmPush
-  displayName: 'az acr helm push'
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+  displayName: 'helm package'
   failOnStderr: true
-  bash: |
+# push on master only
+- bash: |
     cd $(projectName)
     chartPackage=$(ls $(projectName)-*.tgz)
     az acr helm push \
@@ -51,7 +46,11 @@ steps:
         -p $(registryPassword) \
         $chartPackage
     echo $(jq -n --arg version "$(helmChartVersion)" '{helmChartVersion: $version}') > $(build.artifactStagingDirectory)/variables.json
-
+  name: helmPush
+  displayName: 'az acr helm push'
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+  failOnStderr: true
+  
 # ---- variables.json ---
 - publish: $(build.artifactStagingDirectory)
   artifact: build-artifact
