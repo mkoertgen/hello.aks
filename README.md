@@ -62,7 +62,7 @@ code .
 A few of the services will provide HTML UIs. To enable external access, Ingress needs to be set up on each of these services using the external DNS of the cluster. Don't worry, though, this is easy. You can use VS Code's integrated terminal or the Cloud Shell tools in VS Code to run this `az` command line call, which will get your AKS cluster's external DNS.
 
 ```bash
-az aks show -n hello-aks-seabhel-aks -g hello-aks-seabhel-rg --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName
+az aks show -n hello-aks-seabhel-aks -g hello-aks-seabhel-rg --query addonProfiles.httpapplicationrouting.config.HTTPApplicationRoutingZoneName
 ```
 
 ![Get DNS via AZ](media/get-url-via-az.png)
@@ -82,7 +82,7 @@ Change the value of the `basedomain` property to match the DNS for your AKS clus
 ### Connect to your Registry
 
 ```bash
-az acr login -n <your ACR instance name> -g <your ACR instance resource group>
+az acr login -n helloaksseabhelacr -g hello-aks-seabhel-rg
 ```
 
 ### Deploy Parrot and Captain Kube with Draft and Helm
@@ -171,12 +171,12 @@ Watch as more brady ninjas come to life!
 
 ## Leverage Azure DevOps
 
-You could also leverage [Azure DevOps](https://docs.microsoft.com/azure/devops) to implement a [CI/CD pipeline](https://docs.microsoft.com/azure/devops/pipelines) for each app. For that you could [create Azure build pipelines](https://docs.microsoft.com/azure/devops/pipelines/get-started-yaml#get-your-first-build) per app for both Build/CI and Release/CD by using the associated YAML definitions:
+You could also leverage [Azure DevOps](https://docs.microsoft.com/azure/devops) to implement a [CI/CD pipeline](https://docs.microsoft.com/azure/devops/pipelines) for each app. For that you could [create Azure build pipelines](https://docs.microsoft.com/azure/devops/pipelines/get-started-yaml#get-your-first-build) per app using the associated YAML definitions:
 
-- [captainkube/ci-pipeline.yml](captainkube/ci-pipeline.yml) and [captainkube/cd-pipeline.yml](captainkube/cd-pipeline.yml)
-- [nodebrady/ci-pipeline.yml](nodebrady/ci-pipeline.yml) and [nodebrady/cd-pipeline.yml](nodebrady/cd-pipeline.yml)
-- [parrot/ci-pipeline.yml](parrot/ci-pipeline.yml) and [parrot/cd-pipeline.yml](parrot/cd-pipeline.yml)
-- [phippy/ci-pipeline.yml](phippy/ci-pipeline.yml) and [phippy/cd-pipeline.yml](phippy/cd-pipeline.yml)
+- [captainkube/azure-pipelines.yml](captainkube/azure-pipelines.yml)
+- [nodebrady/azure-pipelines.yml](nodebrady/azure-pipelines.yml)
+- [parrot/azure-pipelines.yml](parrot/azure-pipelines.yml)
+- [phippy/azure-pipelines.yml](phippy/azure-pipelines.yml)
 
 ![Azure DevOps workflow](media/azure-devops-workflow.png)
 
