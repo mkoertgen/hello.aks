@@ -4,11 +4,23 @@ Provision a k8s cluster on Azure using Terraform
 
 ## Prerequisites
 
-```console
-az account list --query "[].{name:name, subscriptionId:id, tenantId:tenantId}"
-az account set --subscription="${SUBSCRIPTION_ID}"
-az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/${SUBSCRIPTION_ID}"
+```bash
+$az account list --query "[].{name:name, subscriptionId:id, tenantId:tenantId}"
+$az account set --subscription="${SUBSCRIPTION_ID}"
+$az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/${SUBSCRIPTION_ID}"
+{
+  "appId": "...",
+  "displayName": "azure-cli-2020-03-09-14-05-33",
+  "name": "http://azure-cli-2020-03-09-14-05-33",
+  "password": "...",
+  "tenant": "
+}
 ```
+
+Note `appId/password` to use for `k8s_client_id/k8s_client_secret`.
+To get the object Id of the service principal (`k8s_principal_id`) you will need to check Azure Portal UI at 
+
+- [App registration](https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade)
 
 ## Usage
 
