@@ -9,6 +9,8 @@ steps:
       terraform plan -out current.tfplan
       terraform apply current.tfplan
     workingDirectory: _devops/terraform/azure
+    # TODO: terraform output -json > outputs.json --> publish artifact
+    # TODO: terraform output acr_admin_password > outputs.json --> publish artifact <-- download in next stage
   env:
     # cf.: 
     # - secrets.tfvars.example

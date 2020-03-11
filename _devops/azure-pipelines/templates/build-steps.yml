@@ -39,7 +39,7 @@ steps:
   failOnStderr: true
 # push on master only
 - bash: |
-    chartPackage=$(ls $(projectName)-*.tgz)
+    chartPackage=$(ls $(component)-*.tgz)
     az acr helm push \
         -n $(registryName) \
         -u $(registryLogin) \
