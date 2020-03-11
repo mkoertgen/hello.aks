@@ -1,29 +1,57 @@
 # TODO: pipeline variables to define in Azure UI
-# group `acr`
-# - rg               (resource group name for ACR, AKS, ...)
-# - registryName     (resource name of the ACR)
-# - registryLogin    (ACR username)
+# group `arm` (az account list --query "[].{name:name, subscriptionId:id, tenantId:tenantId}")
+# - armSubscriptionId (Azure Subscription Id)
+# - armTenantId       (Azure Tenant Id)
+# - armClientId       (Azure SPN Client Id)
+# - armClientSecret   (Azure SPN Client Secret)
+# - armAccessKey      (Access Key to Azure Storage Account for Terraform stat backend)
+# group `acr` (TODO: Can remove?)
 # - registryPassword (ACR password)
-# group `aks`
-# - aks              (AKS resource name)
-# - aksSpId          (AKS service principal id)
-# - aksSpSecret      (AKS client secret)
-# - aksSpTenantId    (AKS tenant id)
 
 parameters:
-  projectName: '' # project/component to build/deploy
+  projectName: 'phippyandfriends'
+  component: '' # project/component to build/deploy
   k8sNamespace: 'phippyandfriends' # k8s namespace to deploy to
+  # seabhel: https://www.fantasynamegenerators.com/marvel-celestial-names.php
+  stageId: 'seabhel' # seabhel=dev/test
 
 variables:
+#--- link groups
+- group: arm
+- group: acr
+
+#--- common
+- name: projectName
+  value: ${{ parameters.projectName }}
+- name: component
+  value: ${{ parameters.component }}
+- name: stageId
+  value: ${{ parameters.stageId }}
+
+#--- resource names
+- name: rg
+  value: $(projectName)-$(stageId)-rg
+- name: registryName
+  value: $(projectName)$(stageId)acr
+- name: aks
+  value: $(projectName)-$(stageId)-aks
+
+  #------
   # https://github.com/helm/helm/releases
-  helmVersion: 3.0.3
+- name: helmVersion
+  value: 3.1.1
   #
-  registryServerName: '$(registryName).azurecr.io'
-  #
-  projectName: ${{ parameters.projectName }}
-  imageName: ${{ parameters.projectName }}
+- name: registryLogin
+  value: $(registryName)
+- name: registryServerName
+  value: $(registryName).azurecr.io
+- name: dockerReferenceBase
+  value: $(registryServerName)/$(projectName)
   # TODO: latest?
-  imageTag: $(build.buildId)
-  helmChartVersion: $(build.buildId)
+- name: imageTag
+  value: $(build.buildId)
+- name: helmChartVersion
+  value: $(build.buildId)
   #
-  k8sNamespace: ${{ parameters.k8sNamespace }}
+- name: k8sNamespace
+  value: ${{ parameters.k8sNamespace }}

@@ -1,13 +1,13 @@
 steps:
 # ---- docker ---
-- bash: |
-    cd $(projectName)
-    docker build \
-        -t $(registryServerName)/$(imageName):$(imageTag) \
-        .
-  displayName: 'docker build'
-  failOnStderr: true
-# push on master only
+- task: CmdLine@2
+  displayName: Build $(component) docker image
+  inputs:
+    script: docker-compose build $(component) 2>&1
+  env: # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#secret-variables
+    SONAR_LOGIN: $(sonar.login)
+
+# login & push on master only
 - bash: |
     echo $(registryPassword) | docker login \
         $(registryServerName) \
@@ -15,11 +15,14 @@ steps:
         --password-stdin
   displayName: 'docker login'
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
-- bash: |
-    docker push $(registryServerName)/$(imageName):$(imageTag)
-  displayName: 'docker push'
+
+- task: CmdLine@2
+  displayName: Push $(component) docker image
+  inputs:
+    script: docker-compose push $(component) 2>&1
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/expressions?view=azure-devops
+  # Publish on `master`
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
-  failOnStderr: true
 
 # ---- helm ---
 - task: HelmInstaller@1
@@ -27,22 +30,22 @@ steps:
   inputs:
     helmVersionToInstall: $(helmVersion)
 - bash: |
-    cd $(projectName)
     helm package \
         --version $(helmChartVersion) \
         --app-version $(imageTag) \
-        charts/$(projectName)
+        charts/$(component)
+  workingDirectory: $(component)
   displayName: 'helm package'
   failOnStderr: true
 # push on master only
 - bash: |
-    cd $(projectName)
     chartPackage=$(ls $(projectName)-*.tgz)
     az acr helm push \
         -n $(registryName) \
         -u $(registryLogin) \
         -p $(registryPassword) \
         $chartPackage
+  workingDirectory: $(component)
   name: helmPush
   displayName: 'az acr helm push'
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))

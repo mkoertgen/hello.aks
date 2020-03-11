@@ -1,0 +1,32 @@
+steps:
+# ---- docker ---
+- task: CmdLine@2
+  displayName: Ensure infrastructure (terraform)
+  inputs:
+    # https://www.terraform.io/docs/backends/config.html#partial-configuration
+    script: |
+      terraform init -backend-config="container_name=${TF_VAR_prefix}"
+      terraform plan -out current.tfplan
+      terraform apply current.tfplan
+    workingDirectory: _devops/terraform/azure
+  env:
+    # cf.: 
+    # - secrets.tfvars.example
+    # - https://learn.hashicorp.com/terraform/getting-started/variables.html#from-environment-variables
+    # - https://www.terraform.io/docs/commands/environment-variables.html
+    TF_IN_AUTOMATION: true
+    TF_INPUT: 0
+    # --- Azure
+    # - https://www.terraform.io/docs/backends/types/azurerm.html#configuration-variables
+    ARM_SUBSCRIPTION_ID: $(armSubscriptionId)
+    ARM_TENANT_ID: $(armTenantId)
+    ARM_ACCESS_KEY: $(armAccessKey)
+    ARM_CLIENT_ID: $(armClientId)
+    ARM_CLIENT_SECRET: $(armClientSecret)
+    # --- k8s
+    # TODO: Find a work around that this does not have to redundantly specified
+    TF_VAR_arm_client_id: $(armClientId)
+    TF_VAR_arm_client_secret: $(armClientSecret)
+    # --- common
+    TF_VAR_prefix: $(projectName)-$(stageId)
+    TF_VAR_environment: $(projectName)-$(stageId)

@@ -2,12 +2,17 @@ trigger:
   batch: true
   branches:
     include: 
-    - '*'
+    - master
   paths:
     include: 
     - nodebrady
     
 pr: none
+
+variables:
+  - template: ../_devops/azure-pipelines/templates/vars.yml
+  parameters:
+    component: nodebrady
 
 stages:
 - template: ../_devops/azure-pipelines/templates/stages.yml

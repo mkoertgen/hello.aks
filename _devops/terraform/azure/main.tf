@@ -1,22 +1,37 @@
-# - https://docs.microsoft.com/en-us/azure/terraform/terraform-create-k8s-cluster-with-tf-and-aks
+#--------------------------------------------------------------------------
+terraform {
+  # Terraform backend state, cf.:
+  # - https://www.terraform.io/docs/backends/types/azurerm.html
+  # - https://docs.microsoft.com/en-us/azure/terraform/terraform-backend
+  backend "azurerm" {
+    resource_group_name  = "hello-aks-infrastructure-rg"
+    storage_account_name = "helloakstfbackend"
+    #container_name       = ... # terraform init -backend-config="container_name=$(TF_VAR_prefix)"
+    key = "terraform.tfstate"
+    # access_key          = ARM_ACCESS_KEY (leave private)
+  }
+}
+
 # - https://www.terraform.io/docs/providers/azurerm/index.html
 # - https://github.com/terraform-providers/terraform-provider-azurerm
-
 # Configure the Azure Provider
 provider "azurerm" {
   # whilst the `version` attribute is optional, we recommend pinning to a given version of the Provider
-  version = "=1.42.0"
+  # to upgrade, 1) comment out, 2) run `terraform init --upgrade` and 3) re-pin with the new version
+  version = "=2.0.0"
+  # workaround, cf.: https://github.com/terraform-providers/terraform-provider-azurerm/issues/5893#issuecomment-593335556
+  features {}
 
   # More information on the authentication methods supported by
   # the AzureRM Provider can be found here:
   # http://terraform.io/docs/providers/azurerm/index.html
-
-  # subscription_id = "..."
-  # client_id       = "..."
-  # client_secret   = "..."
-  # tenant_id       = "..."  
+  # subscription_id = ARM_SUBSCRIPTION_ID
+  # tenant_id       = ARM_TENANT_ID
+  # client_id       = ARM_CLIENT_ID
+  # client_secret   = ARM_CLIENT_SECRET
 }
 
+# - https://docs.microsoft.com/en-us/azure/terraform/terraform-create-k8s-cluster-with-tf-and-aks
 #--------------------------------------------------------------------------
 # Create resource group
 resource "azurerm_resource_group" "rg" {
@@ -32,7 +47,7 @@ resource "azurerm_container_registry" "acr" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   sku                 = "Standard"
-  admin_enabled       = false
+  admin_enabled       = true # TODO: needed?
   #georeplication_locations = ["East US", "West Europe"]
 }
 
@@ -57,8 +72,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   service_principal {
-    client_id     = var.k8s_client_id
-    client_secret = var.k8s_client_secret
+    client_id     = var.arm_client_id
+    client_secret = var.arm_client_secret
   }
 
   tags = {
@@ -74,17 +89,29 @@ resource "azurerm_kubernetes_cluster" "aks" {
     kube_dashboard {
       enabled = true
     }
+    # TODO: Add monitoring, cf.: https://docs.microsoft.com/en-us/azure/azure-monitor/insights/container-insights-enable-existing-clusters#enable-using-terraform
+    # oms_agent {
+    #   enabled                    = true
+    #   log_analytics_workspace_id = "${azurerm_log_analytics_workspace.test.id}"
+    # }
   }
 }
 
 #--------------------------------------------------------------------------
+# NOTE!!! Keep in mind that in order to create this role assignment you need
+#  to have `owner` permissions or the `User Access Administrator` role for the subscription (afair)
+# or at least for the ACR in advance.
+# HACK: For the time being, we can create an `Owner` spn instead of only `Contributor`.
+# Azure DevOps creates many SPN all with `Owner` roles for the subscription under the hood.
+# --------
 # Allow k8s to pull from ACR
 # Assign AcrPull role to service principal
 # https://github.com/terraform-providers/terraform-provider-azurerm/issues/5275#issuecomment-579182890
 resource "azurerm_role_assignment" "acrpull_role" {
-  scope                = azurerm_container_registry.acr.id
-  role_definition_name = "AcrPull"
-  principal_id         = var.k8s_principal_id
+  scope                            = azurerm_container_registry.acr.id
+  role_definition_name             = "AcrPull"
+  principal_id                     = var.arm_client_id
+  skip_service_principal_aad_check = true
   depends_on = [
     azurerm_container_registry.acr,
     azurerm_kubernetes_cluster.aks

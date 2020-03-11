@@ -1,3 +1,13 @@
+# TODO: DRY (redundant to ARM_CLIENT_...)
+variable "arm_client_id" {
+  description = "The Client ID for the Service Principal to use for this Managed Kubernetes Cluster"
+}
+
+variable "arm_client_secret" {
+  description = "The Client Secret for the Service Principal to use for this Managed Kubernetes Cluster"
+}
+
+#-------------------------------
 variable "prefix" {
   description = "A prefix used for all resources"
   # seabhel: https://www.fantasynamegenerators.com/marvel-celestial-names.php
@@ -13,29 +23,18 @@ variable "location" {
 }
 
 variable "environment" {
-  description = "Environment tag tos for the created resources (e.g. 'Production', 'Testing')"
+  description = "Environment tag for the created resources (e.g. 'Production', 'Testing')"
   # seabhel: https://www.fantasynamegenerators.com/marvel-celestial-names.php
   default = "Testing" # Development, Testing, Production
+}
+
+#-------------------------------
+variable "k8s_version" {
+  # az aks get-versions -l eastus ---> latest version: 1.17.0
+  default = "1.17.0"
 }
 
 variable "k8s_enable_devspaces" {
   description = "(optional) Enable Azure Dev spaces"
   default     = true
-}
-
-variable "k8s_client_id" {
-  description = "The Client ID for the Service Principal to use for this Managed Kubernetes Cluster"
-}
-
-variable "k8s_client_secret" {
-  description = "The Client Secret for the Service Principal to use for this Managed Kubernetes Cluster"
-}
-
-variable "k8s_principal_id" {
-  description = "The Service Principal's object ID needed for assigning `AcrPull` role to the k8s cluster"
-}
-
-variable "k8s_version" {
-  # az aks get-versions -l eastus ---> latest version: 1.17.0
-  default = "1.17.0"
 }

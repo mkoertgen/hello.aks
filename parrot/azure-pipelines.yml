@@ -2,12 +2,17 @@ trigger:
   batch: true
   branches:
     include: 
-    - '*'
+    - master
   paths:
     include: 
     - parrot
     
 pr: none
+
+variables:
+  - template: ../_devops/azure-pipelines/templates/vars.yml
+  parameters:
+    component: parrot
 
 stages:
 - template: ../_devops/azure-pipelines/templates/stages.yml
