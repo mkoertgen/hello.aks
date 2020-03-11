@@ -9,7 +9,7 @@
 # - registryPassword (ACR password)
 
 parameters:
-  projectName: 'phippyandfriends'
+  projectName: 'hello-aks'
   component: '' # project/component to build/deploy
   k8sNamespace: 'phippyandfriends' # k8s namespace to deploy to
   # seabhel: https://www.fantasynamegenerators.com/marvel-celestial-names.php

@@ -10,7 +10,7 @@ trigger:
 pr: none
 
 variables:
-  - template: ../_devops/azure-pipelines/templates/vars.yml
+- template: ../_devops/azure-pipelines/templates/vars.yml
   parameters:
     component: phippy
 
