@@ -6,7 +6,7 @@ parameters:
     vmImage: 'ubuntu-latest'
 
 stages:
-# ---- build ---
+# ---- infrastructure ---
 - stage: infrastructure
   displayName: infrastructure
   jobs:

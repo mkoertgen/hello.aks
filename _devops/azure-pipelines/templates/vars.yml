@@ -1,57 +1,89 @@
-# TODO: pipeline variables to define in Azure UI
+parameters:
+  projectName: 'hello-aks' # project directory
+  component: '' # required: project/component to build/deploy
+  # seabhel: https://www.fantasynamegenerators.com/marvel-celestial-names.php
+  resourceId: 'seabhel' # seabhel=dev/test
+
+variables:
+# -- azure
+# not PII according to https://stackoverflow.com/a/45663968/2592915
+# - az account list --query "[].{name:name, subscriptionId:id, tenantId:tenantId}"
+- name: armSubscriptionId
+  value: your-subscription-id
+- name: armTenantId
+  value: your-tenant-id
+
+#--- linked groups
+# Pipeline variables to be defined in Azure UI
 # group `arm` (az account list --query "[].{name:name, subscriptionId:id, tenantId:tenantId}")
 # - armSubscriptionId (Azure Subscription Id)
 # - armTenantId       (Azure Tenant Id)
-# - armClientId       (Azure SPN Client Id)
-# - armClientSecret   (Azure SPN Client Secret)
-# - armAccessKey      (Access Key to Azure Storage Account for Terraform stat backend)
-# group `acr` (TODO: Can remove?)
-# - registryPassword (ACR password)
-
-parameters:
-  projectName: 'hello-aks'
-  component: '' # project/component to build/deploy
-  k8sNamespace: 'phippyandfriends' # k8s namespace to deploy to
-  # seabhel: https://www.fantasynamegenerators.com/marvel-celestial-names.php
-  stageId: 'seabhel' # seabhel=dev/test
-
-variables:
-#--- link groups
+# - armClientId      (Azure SPN Client Id)
+# - armClientSecret  (Azure SPN Client Secret)
+# - armAccessKey     (Access Key to Azure Storage Account for Terraform stat backend)
 - group: arm
+# group `acr` (TODO: Replace by Terraform output of ACR creation `admin_user_password`)
+# - registryPassword (ACR password)
 - group: acr
+# group `sonar`
+# - sonar.login
+- group: sonar
 
 #--- common
 - name: projectName
   value: ${{ parameters.projectName }}
+- name: resourceId
+  value: ${{ parameters.resourceId }}
+- name: resourcePrefix
+  value: $(projectName)-$(resourceId)
+
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#system-variables
+- name: stage
+  value: $(System.StageName)
 - name: component
   value: ${{ parameters.component }}
-- name: stageId
-  value: ${{ parameters.stageId }}
 
 #--- resource names
 - name: rg
-  value: $(projectName)-$(stageId)-rg
+  value: $(resourcePrefix)-rg
 - name: registryName
-  value: $(projectName)$(stageId)acr
+  value: $(projectName)$(resourceId)acr # NOTE: must not contain dashes!
 - name: aks
-  value: $(projectName)-$(stageId)-aks
+  value: $(resourcePrefix)-aks
 
-  #------
-  # https://github.com/helm/helm/releases
+#------
+# TODO: Separate this lumped together variables
+
+# https://github.com/helm/helm/releases
+# https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md#ubuntu-18044-lts
 - name: helmVersion
-  value: 3.1.1
-  #
+  value: 3.1.2
+
+  # --- docker
 - name: registryLogin
   value: $(registryName)
 - name: registryServerName
   value: $(registryName).azurecr.io
-- name: dockerReferenceBase
-  value: $(registryServerName)/$(projectName)
-  # TODO: latest?
-- name: imageTag
-  value: $(build.buildId)
-- name: helmChartVersion
-  value: $(build.buildId)
-  #
+- name: dockerImage
+  value: $(registryServerName)/tracto/$(projectName)/$(component)
+  # TODO: latest? --> #332
+- name: dockerImageTag
+  #value: $(build.buildId)
+  value: latest
+
+  # The k8s namespace = project-stage (ttdigital-develeopment, ttdigital-test, ...)
 - name: k8sNamespace
-  value: ${{ parameters.k8sNamespace }}
+  value: $(projectName)-$(stage)
+  #
+- name: helmChartVersion
+  #value: latest
+  value: $(build.buildId)
+- name: helmChartPackage
+  value: $(component)
+- name: helmChartName
+  value: $(registryName)/$(helmChartPackage)
+# Helm Release Naming conventions, cf.:
+# - https://github.com/helm/helm/issues/2062#issuecomment-461903079
+# - https://www.reddit.com/r/devops/comments/bpowq3/what_is_your_helm_release_naming_convention/
+- name: helmRelease
+  value: $(k8sNamespace)-$(helmChartPackage)

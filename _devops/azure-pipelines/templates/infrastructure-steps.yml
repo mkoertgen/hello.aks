@@ -12,7 +12,7 @@ steps:
     # TODO: terraform output -json > outputs.json --> publish artifact
     # TODO: terraform output acr_admin_password > outputs.json --> publish artifact <-- download in next stage
   env:
-    # cf.: 
+    # cf.:
     # - secrets.tfvars.example
     # - https://learn.hashicorp.com/terraform/getting-started/variables.html#from-environment-variables
     # - https://www.terraform.io/docs/commands/environment-variables.html
@@ -30,5 +30,5 @@ steps:
     TF_VAR_arm_client_id: $(armClientId)
     TF_VAR_arm_client_secret: $(armClientSecret)
     # --- common
-    TF_VAR_prefix: $(projectName)-$(stageId)
-    TF_VAR_environment: $(projectName)-$(stageId)
+    TF_VAR_prefix: $(resourcePrefix)
+    #TF_VAR_environment: $(stage) # Testing, Production

@@ -1,32 +1,53 @@
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema#download
 steps:
 - checkout: none
+
 - task: HelmInstaller@1
   displayName: 'install helm'
   inputs:
     helmVersionToInstall: $(helmVersion)
-- bash: |
-    az login \
-        --service-principal \
-        -u $(armClientId) \
-        -p $(armClientSecret) \
-        --tenant $(armTenantId)
-    az aks get-credentials \
-        -n $(aks) \
-        -g $(rg)
-    helm repo add \
-        $(registryName) \
-        https://$(registryServerName)/helm/v1/repo \
+
+- task: CmdLine@2
+  displayName: k8s login
+  inputs:
+    script: |
+      az login --service-principal -u $(armClientId) -p $(armClientSecret) --tenant $(armTenantId)
+      az aks get-credentials -n $(aks) -g $(rg)
+
+- task: CmdLine@2
+  displayName: 'add helm repo'
+  env:
+    HELM_REPO_URL: https://$(registryServerName)/helm/v1/repo
+  inputs:
+    script: |
+      helm repo add $(registryName) ${HELM_REPO_URL} \
         --username $(registryLogin) \
         --password $(registryPassword)
-    helm upgrade \
-        --namespace $(k8sNamespace) \
-        --install \
-        --wait \
-        --version $(helmChartVersion) \
-        --set image.repository=$(registryServerName)/$(projectName) \
-        --set ingress.enabled=false \
-        $(projectName) \
-        $(registryName)/$(projectName)
-  failOnStderr: true
+
+- task: CmdLine@2
+  # Helm 3 breaks in not auto-creating namespace, cf.:
+  # -https://spr.com/how-to-create-a-namespace-in-helm-3/
+  displayName: 'ensure k8s namespace'
+  inputs:
+    script: kubectl get namespace $(k8sNamespace) || kubectl create namespace $(k8sNamespace)
+
+- task: CmdLine@2
   displayName: 'deploy helm chart'
+  env:
+    # TODO: for dev/test ok, prod --> #366
+    INGRESS_ENABLED: false
+    # TODO: Get from terraform output or
+    # az aks show -n $(aks) -g $(rg) --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName
+    INGRESS_BASEDOMAIN: yourdomain.eastus.aksapp.io
+  inputs:
+    script: |
+      helm upgrade --install --wait \
+        --namespace $(k8sNamespace) \
+        --version $(helmChartVersion) \
+        --set-string buildId=$(build.buildId) \
+        --set image.repository=$(dockerImage) \
+        --set image.tag=$(dockerImageTag) \
+        --set ingress.enabled=${INGRESS_ENABLED} \
+        --set ingress.basedomain=${INGRESS_BASEDOMAIN} \
+        $(helmRelease) \
+        $(helmChartName)

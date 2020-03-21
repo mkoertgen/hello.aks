@@ -10,28 +10,59 @@ x-base: &base
   # https://docs.docker.com/compose/compose-file/#restart
   restart: ${DOCKER_RESTART:-unless-stopped}
 
-#-----------------------------------------------------------------------
+x-buildargs: &buildargs
+  # TODO: See predefined variables in Azure DevOps, cf.:
+  # - https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=vsts
+  # - https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=vsts&tabs=yaml%2Cbatch#scripts
+  # - Build.Repository.Uri -> BUILD_REPOSITORY_URI
+  # - Build.SourceVersion (git commit id) -> BUILD_SOURCEVERSION
+  GIT_COMMIT: ${BUILD_SOURCEVERSION:-'git-commit'}
+  BUILD_DATE: ${BUILD_DATE:-'build-date'}
+  BUILD_VERSION: ${BUILD_VERSION:-'semver'}
+
+x-sonar_buildargs: &sonar_buildargs
+  SONAR_LOGIN: ${SONAR_LOGIN:-}
+  SONAR_URL: https://sonarcloud.io
+  SONAR_ORGANIZATION: your-organization
+
+#---------------------------------------------------------------------------
 services:
   captainkube:
     <<: *base
+    image: ${DOCKER_REFERENCE_BASE}/captainkube:${BUILD_VERSION}
     build:
       context: captainkube
+      args:
+        <<: *buildargs
+        <<: *sonar_buildargs
     depends_on: [ 'parrot']
 
   parrot:
     <<: *base
+    image: ${DOCKER_REFERENCE_BASE}/parrot:${BUILD_VERSION}
     build:
       context: parrot
+      args:
+        <<: *buildargs
+        <<: *sonar_buildargs
     ports: ['8080:80']
 
   phippy:
     <<: *base
+    image: ${DOCKER_REFERENCE_BASE}/phippy:${BUILD_VERSION}
     build:
       context: phippy
+      args:
+        <<: *buildargs
+        <<: *sonar_buildargs
     ports: ['8081:80', '3333:3333']
 
   nodebrady:
     <<: *base
+    image: ${DOCKER_REFERENCE_BASE}/nodebrady:${BUILD_VERSION}
     build:
       context: nodebrady
+      args:
+        <<: *buildargs
+        <<: *sonar_buildargs
     ports: ['3000:3000']

@@ -6,47 +6,54 @@ steps:
     script: docker-compose build $(component) 2>&1
   env: # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/variables?view=azure-devops&tabs=yaml%2Cbatch#secret-variables
     SONAR_LOGIN: $(sonar.login)
+    BUILD_VERSION: $(dockerImageTag)
 
 # login & push on master only
-- bash: |
-    echo $(registryPassword) | docker login \
+- task: CmdLine@2
+  displayName: 'docker login'
+  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+  inputs:
+    script: |
+      echo $(registryPassword) | docker login \
         $(registryServerName) \
         -u $(registryLogin) \
         --password-stdin
-  displayName: 'docker login'
-  condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
 
 - task: CmdLine@2
   displayName: Push $(component) docker image
-  inputs:
-    script: docker-compose push $(component) 2>&1
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/process/expressions?view=azure-devops
   # Publish on `master`
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
+  env:
+    BUILD_VERSION: $(dockerImageTag)
+  inputs:
+    script: docker-compose push $(component) 2>&1
 
 # ---- helm ---
 - task: HelmInstaller@1
   displayName: 'install helm'
   inputs:
     helmVersionToInstall: $(helmVersion)
-- bash: |
-    helm package \
-        --version $(helmChartVersion) \
-        --app-version $(imageTag) \
-        charts/$(component)
-  workingDirectory: $(component)
+
+- task: CmdLine@2
   displayName: 'helm package'
-  failOnStderr: true
-# push on master only
-- bash: |
-    chartPackage=$(ls $(component)-*.tgz)
-    az acr helm push \
-        -n $(registryName) \
-        -u $(registryLogin) \
-        -p $(registryPassword) \
-        $chartPackage
-  workingDirectory: $(component)
-  name: helmPush
+  inputs:
+    workingDirectory: $(component)
+    script: |
+      helm package \
+        --version $(helmChartVersion) \
+        --app-version $(dockerImageTag) \
+        charts/$(component)
+
+- task: CmdLine@2
   displayName: 'az acr helm push'
   condition: and(succeeded(), eq(variables['Build.SourceBranchName'], 'master'))
-  failOnStderr: true
+  inputs:
+    workingDirectory: $(component)
+    script: |
+      chartPackage=$(ls $(helmChartPackage)-*.tgz)
+      az acr helm push \
+          -n $(registryName) \
+          -u $(registryLogin) \
+          -p $(registryPassword) \
+          $chartPackage
