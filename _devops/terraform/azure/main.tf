@@ -18,7 +18,7 @@ terraform {
 provider "azurerm" {
   # whilst the `version` attribute is optional, we recommend pinning to a given version of the Provider
   # to upgrade, 1) comment out, 2) run `terraform init --upgrade` and 3) re-pin with the new version
-  version = "=2.0.0"
+  version = "2.2.0"
   # workaround, cf.: https://github.com/terraform-providers/terraform-provider-azurerm/issues/5893#issuecomment-593335556
   features {}
 
