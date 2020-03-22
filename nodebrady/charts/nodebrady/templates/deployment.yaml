@@ -16,6 +16,10 @@ spec:
     metadata:
       labels:
         app: {{ template "fullname" . }}
+      annotations:
+        # cf.: https://stackoverflow.com/a/58603041/2592915
+        #timestamp: "{{ .Values.timestamp }}"
+        timestamp: "{{ date "20060102150405" .Release.Time }}"
     spec:
 {{ if .Values.image.useImagePullSecrets }}
       imagePullSecrets:
