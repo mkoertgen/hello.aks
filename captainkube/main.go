@@ -156,8 +156,8 @@ func pingparrot(pod *v1.Pod, state string) {
 }
 
 func parrotURL(path string) string {
-	baseUrl = getEnv("PARROT_URL", "http://parrot")
-	return fmt.Sprintf("%s/%s", baseUrl, path)
+	baseURL := getEnv("PARROT_URL", "http://parrot")
+	return fmt.Sprintf("%s/%s", baseURL, path)
 }
 
 func getEnv(key, fallback string) string {
