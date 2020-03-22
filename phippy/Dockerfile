@@ -1,9 +1,9 @@
-FROM composer:1.9.3 AS build-env
+FROM composer:1.10.1 AS build-env
 WORKDIR /app
 COPY . /app/
 RUN composer install
 
-FROM php:7.4.2-apache-buster
+FROM php:7.4.4-zts-alpine3.11
 ENV PORT 3333
 EXPOSE 3333
 COPY --from=build-env /app /var/www/html
