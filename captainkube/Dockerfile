@@ -1,5 +1,5 @@
 # Build
-FROM golang:1.13.7-alpine3.11 as builder
+FROM golang:1.14.1-alpine3.11 as builder
 
 WORKDIR /build
 COPY main.go go.mod go.sum ./
