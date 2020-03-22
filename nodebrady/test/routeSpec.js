@@ -1,10 +1,19 @@
-/*global describe, it*/
-'use strict';
-const superagent = require('supertest');
+const supertest = require('supertest');
 const app = require('../app');
-const request = superagent(app.listen());
 
 describe('Routes', () => {
+  let request = null
+  let server = null
+
+  before(function (done) {
+    server = app.listen(done)
+    request = supertest.agent(server)
+  })
+
+  after(function (done) {
+    server.close(done)
+  })
+
   describe('GET /', () => {
     it('should return 200', done => {
       request

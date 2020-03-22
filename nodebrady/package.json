@@ -7,14 +7,14 @@
     "test": "mocha"
   },
   "dependencies": {
+    "co-body": "^6.0.0",
+    "co-views": "^2.1.0",
     "koa": "^2.11.0",
+    "koa-compress": "^3.0.0",
     "koa-logger": "^3.2.1",
     "koa-static": "^5.0.0",
-    "koa-route": "^3.2.0",
-    "koa-compress": "^3.0.0",
-    "co-views": "^2.1.0",
-    "swig": "^1.4.2",
-    "co-body": "^6.0.0"
+    "koa2-router": "^2.0.1",
+    "swig": "^1.4.2"
   },
   "devDependencies": {
     "mocha": "^7.1.1",

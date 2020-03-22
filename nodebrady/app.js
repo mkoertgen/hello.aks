@@ -3,26 +3,25 @@ const messages = require('./controllers/messages');
 const compress = require('koa-compress');
 const logger = require('koa-logger');
 const serve = require('koa-static');
-const route = require('koa-route');
 const Koa = require('koa');
+const Router = require('koa2-router');
 const path = require('path');
 const app = module.exports = new Koa();
 
-// Logger
-app.use(logger());
+//app.use(logger());
+//app.use(serve(path.join(__dirname, 'public')));
+//app.use(compress());
 
-app.use(route.get('/', messages.home));
-app.use(route.get('/messages', messages.list));
-app.use(route.get('/messages/:id', messages.fetch));
-app.use(route.post('/messages', messages.create));
-app.use(route.get('/async', messages.delay));
-app.use(route.get('/promise', messages.promise));
+// Routing
+const router = new Router();
+router.get('/', messages.home);
+router.get('/messages', messages.list);
+router.get('/messages/:id', messages.fetch);
+router.post('/messages', messages.create);
+router.get('/async', messages.delay);
+router.get('/promise', messages.promise);
 
-// Serve static files
-app.use(serve(path.join(__dirname, 'public')));
-
-// Compress
-app.use(compress());
+app.use(router);
 
 if (!module.parent) {
   app.listen(3000);

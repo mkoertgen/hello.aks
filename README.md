@@ -38,7 +38,7 @@ Here's a short list of all the things you'll need to do. Don't worry - you'll be
 1. An Azure Container Registry instance (or a Docker Hub account if you prefer to use Docker Hub). If you opt to use Azure Container Registry, make sure you [configure RBAC access so that AKS has the proper role assignment to access your ACR](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-auth-aks#grant-aks-access-to-acr).
 1. You'll need to install a few tools handy for developing with containers and Kubernetes, and the Azure CLI:
     1. [The Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest)
-    1. [Helm](http://helm.sh) and [Draft](https://draft.sh/) are also required, as they enable deploying and debugging code in Kubernetes.
+    1. [Helm](http://helm.sh)
     1. [Visual Studio Code](http://code.visualstudio.com) and the [Kubernetes extension](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) for it would also be great to have.
 
 For more details see [_docs/01-prerequisites.md](_docs/01-prerequisites.md).
@@ -85,14 +85,14 @@ Change the value of the `basedomain` property to match the DNS for your AKS clus
 az acr login -n helloaksseabhelacr -g hello-aks-seabhel-rg
 ```
 
-### Deploy Parrot and Captain Kube with Draft and Helm
+### Deploy Parrot and Captain Kube with Helm
 
 Now you'll create the first two services, **parrot** and **captainkube**.
 
 1. The captainkube service, a simple Go app, is represented by Captain Kube from the Children's Illustrated Guide to Kubernetes. This service constantly watches the pods running in the Kubernetes cluster. Whenever a pod is activated, updated, or deleted from the cluster, captainkube tells the parrot service what just happened.
 2. The parrot service is essentially an ASP.NET Core app with a Web API back-end. The Web API bubbles events up to the HTML client via a SignalR Hub. Parrot essentially "parrots" what captainkube is telling him in the form of [Semantic UI](http://semantic-ui.com) cards on the UI side. When services pop into the cluster, they're represented by characters shown in the cards.
 
-These two baseline services need to be running first, so you can Draft them up into the cluster using the commands below.
+These two baseline services need to be running first, so you can deploy them up into the cluster using the commands below.
 
 ```bash
 cd parrot
