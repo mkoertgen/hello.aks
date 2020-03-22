@@ -3,12 +3,14 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"reflect"
 	"time"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -38,7 +40,7 @@ func runhealthz() {
 	// Start listening for health checks
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, req *http.Request) {
-		checkReq, err := http.NewRequest(http.MethodGet, "http://parrot-parrot/", bytes.NewBuffer([]byte(``)))
+		checkReq, err := http.NewRequest(http.MethodGet, parrotURL(""), bytes.NewBuffer([]byte(``)))
 		httpclient := &http.Client{}
 		_, err = httpclient.Do(checkReq)
 		if err != nil {
@@ -67,9 +69,9 @@ func runinformer(done chan struct{}) {
 	}
 
 	// Clear the cluster status, start with a blank slate
-	req, err := http.NewRequest(http.MethodDelete, "http://parrot-parrot/api/ClusterStatus", bytes.NewBuffer([]byte(``)))
+	req, err := http.NewRequest(http.MethodDelete, parrotURL("api/ClusterStatus"), bytes.NewBuffer([]byte(``)))
 	httpclient := &http.Client{}
-    _, err = httpclient.Do(req)
+	_, err = httpclient.Do(req)
 	if err != nil {
 		log.Printf("The HTTP request failed with error %s", err)
 	} else {
@@ -85,9 +87,9 @@ func runinformer(done chan struct{}) {
 		10*time.Second,
 		cache.Indexers{},
 	) // We only want `Pod`, force resync every 10 seconds
-	
-	  // Setup the trigger handlers that will receive triggers
-	  informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+
+	// Setup the trigger handlers that will receive triggers
+	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		// This method is executed when a new pod is created
 		AddFunc: func(obj interface{}) {
 			pod, ok := obj.(*v1.Pod) // cast the object as a pod
@@ -95,7 +97,7 @@ func runinformer(done chan struct{}) {
 				//log.Printf("Couldn't cast object as pod: %s", obj)
 				return
 			}
-			pingparrot(pod,"Added") // Ping the parrot
+			pingparrot(pod, "Added") // Ping the parrot
 		},
 		// This method is executed when an existing pod is updated
 		UpdateFunc: func(oldObj, newObj interface{}) {
@@ -106,7 +108,7 @@ func runinformer(done chan struct{}) {
 			}
 			// Deep compare objects and only notify if they are truly different
 			if !reflect.DeepEqual(oldObj, newObj) {
-				pingparrot(newPod,"Updated") // Ping the parrot
+				pingparrot(newPod, "Updated") // Ping the parrot
 			}
 		},
 		// This method is executed when an existing pod is deleted
@@ -116,12 +118,12 @@ func runinformer(done chan struct{}) {
 				//log.Printf("Couldn't cast object as pod: %s", obj)
 				return
 			}
-			pingparrot(pod,"Deleted") // Ping the parrot
+			pingparrot(pod, "Deleted") // Ping the parrot
 		},
-	  })
-	
-	  // Start the informer, until `done` is closed
-	  informer.Run(done)
+	})
+
+	// Start the informer, until `done` is closed
+	informer.Run(done)
 }
 
 func pingparrot(pod *v1.Pod, state string) {
@@ -143,7 +145,7 @@ func pingparrot(pod *v1.Pod, state string) {
 		jsonValue, _ := json.Marshal(p)
 		//log.Printf("\n%s\n",jsonValue)
 
-		_, err := http.Post("http://parrot-parrot/api/ClusterStatus", "application/json", bytes.NewBuffer(jsonValue))
+		_, err := http.Post(parrotURL("api/ClusterStatus"), "application/json", bytes.NewBuffer(jsonValue))
 		if err != nil {
 			log.Printf("The HTTP request failed with error %s", err)
 		} else {
@@ -151,4 +153,16 @@ func pingparrot(pod *v1.Pod, state string) {
 		}
 		log.Printf("\n\n")
 	}
+}
+
+func parrotURL(path string) string {
+	baseUrl = getEnv("PARROT_URL", "http://parrot")
+	return fmt.Sprintf("%s/%s", baseUrl, path)
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
