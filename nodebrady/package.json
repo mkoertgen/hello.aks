@@ -17,7 +17,7 @@
     "co-body": "^6.0.0"
   },
   "devDependencies": {
-    "mocha": "^7.0.1",
+    "mocha": "^7.1.1",
     "supertest": "^4.0.2"
   }
 }
