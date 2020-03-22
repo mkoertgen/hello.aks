@@ -3,7 +3,7 @@ WORKDIR /app
 COPY . /app/
 RUN composer install
 
-FROM php:7.4.4-zts-alpine3.11
+FROM php:7.4.4-apache-buster
 ENV PORT 3333
 EXPOSE 3333
 COPY --from=build-env /app /var/www/html
