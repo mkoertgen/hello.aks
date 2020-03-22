@@ -65,7 +65,7 @@ variables:
 - name: registryServerName
   value: $(registryName).azurecr.io
 - name: dockerImage
-  value: $(registryServerName)/tracto/$(projectName)/$(component)
+  value: $(registryServerName)/$(component)
   # TODO: latest? --> #332
 - name: dockerImageTag
   #value: $(build.buildId)
