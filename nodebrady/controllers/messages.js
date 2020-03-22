@@ -27,8 +27,8 @@ const list = (ctx) => {
   ctx.body = messages;
 }
 
-const fetch = (ctx, id) => {
-  const message = messages[id];
+const fetch = (ctx) => {
+  const message = messages[ctx.params.id];
   if (!message) {
     ctx.throw(404, 'message with id = ' + id + ' was not found');
   }
@@ -36,7 +36,7 @@ const fetch = (ctx, id) => {
 }
 
 const create = (ctx) => {
-  const message = parse(this);
+  const message = parse(ctx.request.body);
   const id = messages.push(message) - 1;
   message.id = id;
   ctx.redirect('/');
