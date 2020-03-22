@@ -1,10 +1,10 @@
 # Build
-FROM node:13.8.0-alpine3.11 AS base
+FROM node:13.10.1-alpine3.11 AS base
 
 WORKDIR /app
 
 # Dependencies
-FROM base AS dependencies  
+FROM base AS dependencies
 
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
@@ -13,12 +13,12 @@ COPY package*.json ./
 RUN npm install
 
 # Copy Files/Build ----
-FROM dependencies AS build  
+FROM dependencies AS build
 WORKDIR /app
 COPY . /app
 
 # Release with Alpine
-FROM base AS release  
+FROM base AS release
 
 # Create app directory
 WORKDIR /app
