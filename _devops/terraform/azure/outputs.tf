@@ -1,26 +1,30 @@
 # k8s / aks
-output "id" {
+output "aks_id" {
   value = azurerm_kubernetes_cluster.aks.id
 }
 
-output "kube_config" {
+output "aks_kube_config" {
   value = azurerm_kubernetes_cluster.aks.kube_config_raw
 }
 
-output "client_key" {
+output "aks_client_key" {
   value = azurerm_kubernetes_cluster.aks.kube_config.0.client_key
 }
 
-output "client_certificate" {
+output "aks_client_certificate" {
   value = azurerm_kubernetes_cluster.aks.kube_config.0.client_certificate
 }
 
-output "cluster_ca_certificate" {
+output "aks_cluster_ca_certificate" {
   value = azurerm_kubernetes_cluster.aks.kube_config.0.cluster_ca_certificate
 }
 
-output "host" {
+output "aks_host" {
   value = azurerm_kubernetes_cluster.aks.kube_config.0.host
+}
+
+output "aks_basedomain" {
+  value = azurerm_kubernetes_cluster.aks.http_application_routing.http_application_routing_zone_name
 }
 
 #---- acr
