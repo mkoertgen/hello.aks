@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1.101-alpine3.10 AS build-env
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1.200-alpine3.11 AS build-env
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -10,7 +10,7 @@ COPY . ./
 RUN dotnet publish -c Release -o out
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.1-alpine3.10
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2-alpine3.11
 WORKDIR /app
 COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "parrot.dll"]
