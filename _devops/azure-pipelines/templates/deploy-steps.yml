@@ -33,12 +33,6 @@ steps:
 
 - task: CmdLine@2
   displayName: 'deploy helm chart'
-  env:
-    # TODO: for dev/test ok, prod --> #366
-    INGRESS_ENABLED: false
-    # TODO: Get from terraform output or
-    # az aks show -n $(aks) -g $(rg) --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName
-    INGRESS_BASEDOMAIN: yourdomain.eastus.aksapp.io
   inputs:
     script: |
       helm upgrade --install --wait \
@@ -47,7 +41,7 @@ steps:
         --set-string buildId=$(build.buildId) \
         --set image.repository=$(dockerImage) \
         --set image.tag=$(dockerImageTag) \
-        --set ingress.enabled=${INGRESS_ENABLED} \
-        --set ingress.basedomain=${INGRESS_BASEDOMAIN} \
+        --set ingress.enabled=$(ingressEnabled) \
+        --set ingress.basedomain=$(ingressBaseDomain) \
         $(helmRelease) \
         $(helmChartName)

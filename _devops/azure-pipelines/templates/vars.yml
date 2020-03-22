@@ -74,6 +74,15 @@ variables:
   # The k8s namespace = project-stage (ttdigital-develeopment, ttdigital-test, ...)
 - name: k8sNamespace
   value: $(projectName)-$(stage)
+
+  # TODO: for dev/test ok maybe false, for prod should be true
+- name: ingressEnabled
+  value: true
+  # TODO: Get from terraform output `aks_basedomain` or
+  # az aks show -n $(aks) -g $(rg) --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName
+- name: ingressBaseDomain
+  value: 129a383d656f4cfebf71.eastus.aksapp.io
+
   #
 - name: helmChartVersion
   #value: latest
