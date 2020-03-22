@@ -28,11 +28,11 @@ const list = (ctx) => {
 }
 
 const fetch = (ctx) => {
-  const message = messages[ctx.params.id];
-  if (!message) {
+  const id = Number(ctx.params.id);
+  if (0 <= id && id < messages.length)
+    ctx.body = messages[id];
+  else
     ctx.throw(404, 'message with id = ' + id + ' was not found');
-  }
-  ctx.body = message;
 }
 
 const create = (ctx) => {
