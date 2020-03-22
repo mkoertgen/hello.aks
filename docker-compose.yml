@@ -36,6 +36,8 @@ services:
         <<: *buildargs
         <<: *sonar_buildargs
     depends_on: [ 'parrot']
+    environment:
+      PARROT_URL: 'http://parrot:80'
 
   parrot:
     <<: *base

@@ -43,4 +43,5 @@ spec:
           - name: K8S_NAMESPACE
             value: "{{ .Release.Namespace }}"
           - name: PARROT_URL
-            value: "{{ .Release.Namespace }}-parrot-parrot.{{ .Values.ingress.basedomain }}
+            ##value: "https://{{ .Release.Namespace }}-parrot-parrot.{{ .Values.ingress.basedomain }}
+            value: "http://{{ .Release.Namespace }}-parrot-parrot
