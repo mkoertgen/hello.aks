@@ -47,7 +47,7 @@ variables:
 - name: rg
   value: $(resourcePrefix)-rg
 - name: registryName
-  value: $(projectName)$(resourceId)acr # NOTE: must not contain dashes!
+  value: helloaks$(resourceId)acr # NOTE: must not contain dashes!
 - name: aks
   value: $(resourcePrefix)-aks
 
