@@ -24,7 +24,7 @@ output "aks_host" {
 }
 
 output "aks_basedomain" {
-  value = azurerm_kubernetes_cluster.aks.http_application_routing.http_application_routing_zone_name
+  value = azurerm_kubernetes_cluster.aks.addon_profile[0].http_application_routing[0].http_application_routing_zone_name
 }
 
 #---- acr
